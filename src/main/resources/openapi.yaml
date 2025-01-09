@@ -1,0 +1,323 @@
+openapi: 3.0.3
+info:
+  title: openapi-generation
+  version: 1.0.1
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/v1/transactions:
+    get:
+      tags:
+        - TransactionController
+      summary: Получение списка транзакций
+      operationId: getListTransactions
+      responses:
+        200:
+          description: успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/TransactionResponseDto'
+        400:
+          description: некорректные данные
+        404:
+          description: не найдено
+
+    post:
+      tags:
+        - TransactionController
+      summary: Создание новой записи
+      operationId: createNewRecord
+      requestBody:
+        $ref: '#/components/requestBodies/transactionsRequest'
+      responses:
+        201:
+          description: Данные запроса успешно провалидированы, запись в БД внесена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponseDto'
+        400:
+          description: Неверные параметры запроса
+
+  /api/v1/transactions/{id}:
+    get:
+      tags:
+        - TransactionController
+      summary: Получение транзакции по ID
+      operationId: getTransactionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+          200:
+            description: Запись с указанным ID присутствует, успешный запроc
+            content:
+              application/json:
+                schema:
+                    $ref: '#/components/schemas/TransactionResponseDto'
+          400:
+            description: Запись с указанным ID отсутствует
+
+    put:
+      tags:
+        - TransactionController
+      summary: Изменение существующей записи
+      operationId: changeRecord
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/transactionsRequest'
+      responses:
+        202:
+          description: Запись с указанным ID присутствует, данные запроса успешно провалидированы, данные в БД изменены
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/TransactionResponseDto'
+        400:
+          description: Неверные параметры запроса
+        404:
+          description: Запись с указанным ID отсутствует
+
+    delete:
+      tags:
+        - TransactionController
+      summary: Удаление записи
+      operationId: deleteRecord
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Запись с указанным ID присутствует, данные в БД изменены
+        400:
+          description: Неверные параметры запроса
+        404:
+          description: Запись с указанным ID отсутствует
+
+
+components:
+  requestBodies:
+    transactionsRequest:
+      description: Создание новой записи.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TransactionRequestDto'
+
+  schemas:
+    TransactionResponseDto:
+      title: Получение списка транзакций
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: идентификатор
+        op_date:
+          type: string
+          format: localdatetime
+          description: Дата и время транзакции по cведениям эмитента
+        gas_station_id:
+          type: string
+          format: uuid
+          description: ID АЗС
+        card_id:
+          type: string
+          format: uuid
+          description: ID топливной карты
+        contract_id:
+          type: string
+          format: uuid
+          description: ID договора
+        nomenclature_id:
+          type: string
+          format: uuid
+          description: ID номенклатуры
+        amount:
+          type: integer
+          format: int64
+          description: Количество
+        stella_sum:
+          type: integer
+          format: int64
+          description: Сумма по стелле
+        stella_nds_sum:
+          type: integer
+          format: int64
+          description: Сумма НДС по стелле
+        refund:
+          type: boolean
+          example: false
+          description: Признак транзакции возврата
+        buy_sum_plan:
+          type: integer
+          format: int64
+          description: Сумма покупки план
+        buy_nds_sum_plan:
+          type: integer
+          format: int64
+          description: Сумма НДС покупки план
+        buy_sum_fact:
+          type: integer
+          format: int64
+          description: Сумма покупки план
+        buy_nds_sum_fact:
+          type: integer
+          format: int64
+          description: Сумма НДС продажи план
+        sell_sum_plan:
+          type: integer
+          format: int64
+          description: Сумма продажи план
+        sell_nds_sum_plan:
+          type: integer
+          format: int64
+          description: Сумма НДС продажи план
+        sell_sum_fact:
+          type: integer
+          format: int64
+          description: Сумма продажи факт
+        sell_nds_sum_fact:
+          type: integer
+          format: int64
+          description: Сумма НДС продажи факт
+        implementation_id:
+          type: string
+          format: uuid
+          description: ID документа реализации
+        user_id:
+          type: string
+          format: uuid
+          description: ID пользователя, добавившего запись или внесшегоизменения в запись
+        date_created:
+          type: string
+          format: timestamp
+          description: Дата и время создания записи в таблице
+        date_updated:
+          type: string
+          format: localdatetime
+          description: Дата и время последнего изменения записи в таблице
+        deleted:
+          type: boolean
+          example: false
+          description: Признак удаления записи
+
+
+    TransactionRequestDto:
+      title: Создание новой записи
+      type: object
+      properties:
+        op_date:
+          type: string
+          format: localdatetime
+          example:
+          description: Дата и время транзакции по cведениям эмитента
+        gas_station_id:
+          type: string
+          format: uuid
+          example:
+          description: ID АЗС
+        card_id:
+          type: string
+          format: uuid
+          example:
+          description: ID топливной карты
+        contract_id:
+          type: string
+          format: uuid
+          example:
+          description: ID договора
+        nomenclature_id:
+          type: string
+          format: uuid
+          example:
+          description: ID номенклатуры
+        amount:
+          type: integer
+          format: int64
+          example:
+          description: Количество
+        stella_sum:
+          type: integer
+          format: int64
+          example:
+          description: Сумма по стелле
+        stella_nds_sum:
+          type: integer
+          format: int64
+          example:
+          description: Сумма НДС по стелле
+        refund:
+          type: boolean
+          example: false
+          description: Признак транзакции возврата
+        buy_sum_plan:
+          type: integer
+          format: int64
+          example:
+          description: Сумма покупки план
+        buy_nds_sum_plan:
+          type: integer
+          format: int64
+          example:
+          description: Сумма НДС покупки план
+        buy_sum_fact:
+          type: integer
+          format: int64
+          example:
+          description: Сумма покупки план
+        buy_nds_sum_fact:
+          type: integer
+          format: int64
+          example:
+          description: Сумма НДС продажи план
+        sell_sum_plan:
+          type: integer
+          format: int64
+          example:
+          description: Сумма продажи план
+        sell_nds_sum_plan:
+          type: integer
+          format: int64
+          example:
+          description: Сумма НДС продажи план
+        sell_sum_fact:
+          type: integer
+          format: int64
+          example:
+          description: Сумма продажи факт
+        sell_nds_sum_fact:
+          type: integer
+          format: int64
+          example:
+          description: Сумма НДС продажи факт
+        implementation_id:
+          type: string
+          format: uuid
+          example:
+          description: ID документа реализации
+        user_id:
+          type: string
+          format: uuid
+          example:
+          description: ID пользователя, добавившего запись или внесшегоизменения в запись
